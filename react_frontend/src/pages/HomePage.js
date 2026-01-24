@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Search, TrendingUp } from "lucide-react";
 
 import { searchUser } from "../lib/api";
+import UserInsightsView from "../components/UserInsightsView";
+import { Button } from "../components/ui/button";
 
 // PUBLIC_INTERFACE
 export default function HomePage() {
@@ -42,9 +44,9 @@ export default function HomePage() {
               <TrendingUp size={14} /> Midnight Analytics
             </span>
           </div>
-          <a className="btn" href="/admin">
+          <Button asChild href="/admin">
             Admin
-          </a>
+          </Button>
         </div>
 
         <div className="card glass">
@@ -92,62 +94,13 @@ export default function HomePage() {
         </div>
 
         <div style={{ marginTop: 22 }}>
-          {query.isFetching ? (
-            <InsightsSkeleton />
-          ) : query.isError ? (
+          {query.isError ? (
             <ErrorState isNotFound={isNotFound} message={query.error?.message || "Something went wrong."} />
-          ) : query.data ? (
-            <pre
-              className="card"
-              style={{
-                padding: 18,
-                overflowX: "auto",
-                borderRadius: 16,
-                border: "1px solid var(--border)",
-                background: "rgba(15,23,42,0.55)",
-              }}
-            >
-              {JSON.stringify(query.data, null, 2)}
-            </pre>
+          ) : submitted ? (
+            <UserInsightsView payload={query.data} isFetching={query.isFetching} />
           ) : (
-            <div style={{ marginTop: 18, color: "var(--muted)" }}>
-              Tip: Start with a trending search to see the dashboard payload.
-            </div>
+            <div style={{ marginTop: 18, color: "var(--muted)" }}>Tip: Start with a trending search to see the dashboard.</div>
           )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function InsightsSkeleton() {
-  return (
-    <div className="bento" aria-label="Loading insights">
-      <div className="card">
-        <div className="card-inner">
-          <div className="skeleton" style={{ height: 18, width: "42%", marginBottom: 12 }} />
-          <div className="skeleton" style={{ height: 260, width: "100%" }} />
-        </div>
-      </div>
-
-      <div className="bento-right">
-        <div className="card">
-          <div className="card-inner">
-            <div className="skeleton" style={{ height: 16, width: "55%", marginBottom: 10 }} />
-            <div className="skeleton" style={{ height: 54, width: "100%" }} />
-          </div>
-        </div>
-        <div className="card">
-          <div className="card-inner">
-            <div className="skeleton" style={{ height: 16, width: "50%", marginBottom: 10 }} />
-            <div className="skeleton" style={{ height: 54, width: "100%" }} />
-          </div>
-        </div>
-        <div className="card">
-          <div className="card-inner">
-            <div className="skeleton" style={{ height: 16, width: "60%", marginBottom: 10 }} />
-            <div className="skeleton" style={{ height: 54, width: "100%" }} />
-          </div>
         </div>
       </div>
     </div>

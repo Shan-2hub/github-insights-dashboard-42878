@@ -1,4 +1,4 @@
-/* Midnight Dark Theme (Tailwind-like tokens without requiring Tailwind setup) */
+/* Midnight Dark Theme tokens (kept for backwards compatibility + quick custom styling) */
 :root {
   --bg: #020617; /* slate-950 */
   --surface: #0f172a; /* slate-900 */
@@ -28,8 +28,7 @@ body,
 body {
   margin: 0;
   background: radial-gradient(1200px 800px at 20% 0%, rgba(30, 58, 138, 0.18), transparent 55%),
-    radial-gradient(900px 600px at 80% 10%, rgba(245, 158, 11, 0.12), transparent 50%),
-    var(--bg);
+    radial-gradient(900px 600px at 80% 10%, rgba(245, 158, 11, 0.12), transparent 50%), var(--bg);
   color: var(--text);
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
     "Segoe UI Emoji";
@@ -78,7 +77,13 @@ a {
   font-size: 12px;
 }
 
-/* “shadcn-like” primitives (CSS-only) */
+.badge-verified {
+  border-color: rgba(5, 150, 105, 0.45);
+  background: rgba(5, 150, 105, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* “shadcn-like” primitives (CSS-only, still compatible with Tailwind usage) */
 .card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
   border: 1px solid var(--border);
@@ -206,7 +211,7 @@ a {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.10), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   animation: shimmer 1.2s infinite;
 }
 
@@ -228,4 +233,34 @@ a {
   margin: 0;
   color: var(--muted);
   line-height: 1.6;
+}
+
+/* Table (admin) */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+.table th,
+.table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.9);
+  text-align: left;
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.table th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.65);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
 }
