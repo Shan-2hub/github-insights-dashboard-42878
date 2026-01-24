@@ -1,21 +1,27 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, TrendingUp } from "lucide-react";
+import { Search } from "lucide-react";
 import { isAuthed } from "../lib/auth";
 
 // PUBLIC_INTERFACE
 export default function HomePage() {
-  /** Public landing page with hero search; nudges users to auth before app portal. */
+  /** Public landing page with centered hero + CTA search + dynamic trust counter. */
   const trending = useMemo(() => ["torvalds", "gaearon", "sindresorhus", "vercel", "openai"], []);
   const [username, setUsername] = useState("");
   const nav = useNavigate();
+
+  // Spec: after 5 seconds, transition counter from "Trusted by 0 developers" to "Trusted by 10,000+ developers".
+  const [trustedCount, setTrustedCount] = useState(0);
+  useEffect(() => {
+    const t = window.setTimeout(() => setTrustedCount(10000), 5000);
+    return () => window.clearTimeout(t);
+  }, []);
 
   const onSubmit = (e) => {
     e.preventDefault();
     const u = username.trim();
     if (!u) return;
 
-    // If logged in, go straight to the app portal dashboard.
     if (isAuthed()) nav(`/app/dashboard/${encodeURIComponent(u)}`);
     else nav("/auth");
   };
@@ -30,14 +36,29 @@ export default function HomePage() {
     <div className="page">
       <div className="container">
         <div className="card glass">
-          <div className="card-inner">
-            <h1 className="h1">Elite Explorer</h1>
-            <p className="p" style={{ color: "#94a3b8" }}>
-              A modern SaaS-style GitHub developer analytics dashboard: bento insights, language distribution, and recent
-              activity—powered by secure backend caching.
+          <div className="card-inner" style={{ textAlign: "center" }}>
+            <h1 className="h1" style={{ marginBottom: 10 }}>
+              Explore Your Developer Persona
+            </h1>
+            <p className="p" style={{ color: "#94a3b8", maxWidth: 860, margin: "0 auto" }}>
+              Search any GitHub username to see profile insights, language distribution, and recent activity—served with
+              smart caching.
             </p>
 
-            <form onSubmit={onSubmit} className="glow-search" style={{ marginTop: 18, display: "flex", gap: 12, alignItems: "center" }}>
+            <form
+              onSubmit={onSubmit}
+              className="glow-search"
+              style={{
+                marginTop: 18,
+                display: "flex",
+                gap: 12,
+                alignItems: "center",
+                width: "min(860px, 100%)",
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
+              aria-label="Search form"
+            >
               <div style={{ flex: 1, position: "relative" }}>
                 <Search
                   size={18}
@@ -48,6 +69,7 @@ export default function HomePage() {
                     transform: "translateY(-50%)",
                     color: "rgba(255,255,255,0.55)",
                   }}
+                  aria-hidden="true"
                 />
                 <input
                   className="input"
@@ -58,21 +80,30 @@ export default function HomePage() {
                   aria-label="Search GitHub username"
                 />
               </div>
-              <button type="submit" className="btn btn-primary">
+              <button type="submit" className="btn btn-primary hover-scale" aria-label={isAuthed() ? "Explore profile" : "Login to explore"}>
                 {isAuthed() ? "Explore" : "Login to Explore"}
               </button>
             </form>
 
-            <div className="pills" aria-label="Trending searches">
+            <div
+              className="p"
+              style={{
+                marginTop: 12,
+                color: "#94a3b8",
+                transition: "opacity 400ms ease, transform 400ms ease",
+                transform: trustedCount ? "translateY(0)" : "translateY(2px)",
+              }}
+              aria-live="polite"
+            >
+              Trusted by {trustedCount ? "10,000+ developers" : "0 developers"}
+            </div>
+
+            <div className="pills" aria-label="Trending searches" style={{ justifyContent: "center" }}>
               {trending.map((u) => (
-                <button key={u} type="button" className="pill pill-visible" onClick={() => onTrending(u)}>
+                <button key={u} type="button" className="pill pill-visible hover-scale" onClick={() => onTrending(u)} aria-label={`Trending username ${u}`}>
                   {u}
                 </button>
               ))}
-            </div>
-
-            <div className="p" style={{ marginTop: 14, color: "#94a3b8" }}>
-              Trending searches are visible in slate text (#94a3b8) per spec.
             </div>
           </div>
         </div>

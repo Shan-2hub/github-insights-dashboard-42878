@@ -8,6 +8,11 @@ import AppLayout from "./layouts/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import HomePage from "./pages/HomePage";
+import FeaturesPage from "./pages/FeaturesPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
+import BlogPage from "./pages/BlogPage";
+import HelpPage from "./pages/HelpPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import AuthPage from "./pages/AuthPage";
@@ -42,6 +47,11 @@ function App() {
           {/* Public portal (marketing + auth) */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<HomePage />} />
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/help" element={<HelpPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/auth" element={<AuthPage />} />
