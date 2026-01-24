@@ -60,8 +60,8 @@ function formatTime(ts) {
 // PUBLIC_INTERFACE
 export default function AdminPage() {
   /**
-   * Admin portal.
-   * Route protection will be enforced later (auth layer). For now we show a placeholder guard banner.
+   * Admin portal (protected).
+   * Requires JWT with admin claim; enforced by ProtectedRoute and backend.
    */
   const stats = useQuery({ queryKey: ["admin", "stats"], queryFn: getAdminStats });
   const history = useQuery({ queryKey: ["admin", "history"], queryFn: getAdminHistory });
@@ -137,12 +137,10 @@ export default function AdminPage() {
 
         <div className="card" style={{ marginBottom: 16 }}>
           <div className="card-inner" style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-            <span className="badge" style={{ borderColor: "rgba(245,158,11,0.35)" }}>
-              <Lock size={14} /> Protected route (placeholder)
+            <span className="badge" style={{ borderColor: "rgba(5,150,105,0.35)" }}>
+              <Lock size={14} /> Protected route
             </span>
-            <div className="p">
-              Add auth later; until then this view is visible for development and QA.
-            </div>
+            <div className="p">Authenticated admins can view global stats and system health.</div>
           </div>
         </div>
 

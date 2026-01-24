@@ -3,7 +3,19 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import "./App.css";
+import PublicLayout from "./layouts/PublicLayout";
+import AppLayout from "./layouts/AppLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import AuthPage from "./pages/AuthPage";
+import DashboardHomePage from "./pages/DashboardHomePage";
+import DashboardUserPage from "./pages/DashboardUserPage";
+import DashboardRedirectPage from "./pages/DashboardRedirectPage";
+import SettingsPage from "./pages/SettingsPage";
+import SavedProfilesPage from "./pages/SavedProfilesPage";
 import AdminPage from "./pages/AdminPage";
 
 /**
@@ -27,8 +39,50 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          {/* Public portal (marketing + auth) */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+          </Route>
+
+          {/* User/app portal */}
+          <Route
+            path="/app"
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardHomePage />} />
+            <Route path="dashboard" element={<DashboardHomePage />} />
+            <Route path="dashboard/:username" element={<DashboardUserPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="saved" element={<SavedProfilesPage />} />
+          </Route>
+
+          {/* Convenience route requested by spec */}
+          <Route
+            path="/dashboard/:username"
+            element={
+              <ProtectedRoute>
+                <DashboardRedirectPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin portal (protected) */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

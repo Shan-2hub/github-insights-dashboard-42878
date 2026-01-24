@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, TrendingUp } from "lucide-react";
-import { isAuthed } from "../lib/auth";
+import { Card, CardContent } from "../components/ui/card";
 
 // PUBLIC_INTERFACE
-export default function HomePage() {
-  /** Public landing page with hero search; nudges users to auth before app portal. */
+export default function DashboardHomePage() {
+  /** Authenticated dashboard landing within app portal. */
   const trending = useMemo(() => ["torvalds", "gaearon", "sindresorhus", "vercel", "openai"], []);
   const [username, setUsername] = useState("");
   const nav = useNavigate();
@@ -14,30 +14,34 @@ export default function HomePage() {
     e.preventDefault();
     const u = username.trim();
     if (!u) return;
-
-    // If logged in, go straight to the app portal dashboard.
-    if (isAuthed()) nav(`/app/dashboard/${encodeURIComponent(u)}`);
-    else nav("/auth");
+    nav(`/app/dashboard/${encodeURIComponent(u)}`);
   };
 
   const onTrending = (u) => {
     setUsername(u);
-    if (isAuthed()) nav(`/app/dashboard/${encodeURIComponent(u)}`);
-    else nav("/auth");
+    nav(`/app/dashboard/${encodeURIComponent(u)}`);
   };
 
   return (
-    <div className="page">
+    <div className="page" style={{ paddingTop: 22 }}>
       <div className="container">
-        <div className="card glass">
-          <div className="card-inner">
-            <h1 className="h1">Elite Explorer</h1>
+        <div className="header">
+          <div className="brand">
+            <span>Dashboard</span>
+            <span className="badge">
+              <TrendingUp size={14} /> Elite Explorer
+            </span>
+          </div>
+        </div>
+
+        <Card className="glass">
+          <CardContent>
+            <h1 className="h1">Search a GitHub profile</h1>
             <p className="p" style={{ color: "#94a3b8" }}>
-              A modern SaaS-style GitHub developer analytics dashboard: bento insights, language distribution, and recent
-              activity—powered by secure backend caching.
+              Cached insights are returned instantly when available (24h TTL).
             </p>
 
-            <form onSubmit={onSubmit} className="glow-search" style={{ marginTop: 18, display: "flex", gap: 12, alignItems: "center" }}>
+            <form onSubmit={onSubmit} className="glow-search" style={{ marginTop: 18, display: "flex", gap: 12 }}>
               <div style={{ flex: 1, position: "relative" }}>
                 <Search
                   size={18}
@@ -59,7 +63,7 @@ export default function HomePage() {
                 />
               </div>
               <button type="submit" className="btn btn-primary">
-                {isAuthed() ? "Explore" : "Login to Explore"}
+                Search
               </button>
             </form>
 
@@ -70,26 +74,8 @@ export default function HomePage() {
                 </button>
               ))}
             </div>
-
-            <div className="p" style={{ marginTop: 14, color: "#94a3b8" }}>
-              Trending searches are visible in slate text (#94a3b8) per spec.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ErrorState({ isNotFound, message }) {
-  return (
-    <div className="card">
-      <div className="card-inner">
-        <div className="badge" style={{ borderColor: isNotFound ? "rgba(220,38,38,0.45)" : "var(--border)" }}>
-          {isNotFound ? "404" : "Error"}
-        </div>
-        <h2 style={{ margin: "10px 0 6px" }}>{isNotFound ? "User not found" : "Request failed"}</h2>
-        <p className="p">{message}</p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

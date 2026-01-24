@@ -6,12 +6,19 @@
  * - All GitHub requests happen on the FastAPI backend, which uses GITHUB_TOKEN from env.
  */
 
+import { getAuthToken } from "./auth";
+
 const DEFAULT_BASE_URL = "";
 
 /** @returns {string} API base URL */
 function getBaseUrl() {
   // CRA env var convention: REACT_APP_*
   return process.env.REACT_APP_API_BASE_URL || DEFAULT_BASE_URL;
+}
+
+function authHeaders() {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 // PUBLIC_INTERFACE
@@ -39,11 +46,39 @@ export async function searchUser(username) {
 }
 
 // PUBLIC_INTERFACE
+export async function register(email, password) {
+  /** Register and receive JWT token. */
+  const res = await fetch(`${getBaseUrl()}/api/auth/register`, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(payload?.detail || `Register failed (${res.status})`);
+  return payload;
+}
+
+// PUBLIC_INTERFACE
+export async function login(email, password) {
+  /** Login and receive JWT token. */
+  const res = await fetch(`${getBaseUrl()}/api/auth/login`, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(payload?.detail || `Login failed (${res.status})`);
+  return payload;
+}
+
+// PUBLIC_INTERFACE
 export async function getAdminHistory() {
-  /** Fetch recent searches for the admin table. */
+  /** Fetch recent searches for the admin table (protected). */
   const res = await fetch(`${getBaseUrl()}/api/admin/history`, {
     method: "GET",
-    headers: { Accept: "application/json" },
+    headers: { Accept: "application/json", ...authHeaders() },
   });
 
   if (!res.ok) throw new Error(`Admin history failed (${res.status})`);
@@ -52,10 +87,10 @@ export async function getAdminHistory() {
 
 // PUBLIC_INTERFACE
 export async function getAdminStats() {
-  /** Fetch admin stats (rate limit info, aggregates). */
+  /** Fetch admin stats (protected). */
   const res = await fetch(`${getBaseUrl()}/api/admin/stats`, {
     method: "GET",
-    headers: { Accept: "application/json" },
+    headers: { Accept: "application/json", ...authHeaders() },
   });
 
   if (!res.ok) throw new Error(`Admin stats failed (${res.status})`);
