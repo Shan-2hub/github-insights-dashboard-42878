@@ -1,44 +1,117 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { LogIn, Sparkles } from "lucide-react";
+import { ExternalLink, Github, Moon, Sparkles, Sun } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { isAuthed } from "../lib/auth";
 
+function getInitialTheme() {
+  if (typeof window === "undefined") return "dark";
+  const stored = window.localStorage.getItem("theme");
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia?.("(prefers-color-scheme: light)")?.matches ? "light" : "dark";
+}
+
+function applyTheme(theme) {
+  // Minimal theme toggle:
+  // - Dark uses existing tokenized styling.
+  // - Light flips to a readable neutral background while keeping brand accents.
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.colorScheme = theme;
+  window.localStorage.setItem("theme", theme);
+}
+
+function formatCompactInt(n) {
+  const num = Number(n);
+  if (!Number.isFinite(num)) return "—";
+  return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(num);
+}
+
 // PUBLIC_INTERFACE
 export default function PublicLayout() {
-  /** Public portal layout: fixed navbar + multi-column footer + routed content. */
+  /** Public portal layout: fixed utility header + footer + routed content. */
+  const [theme, setTheme] = useState(getInitialTheme);
+  const [starCount, setStarCount] = useState(null);
+
+  // Replace with your real GitHub repo, if different.
+  const repo = useMemo(() => ({ owner: "kavia-ai", name: "github-insights-dashboard" }), []);
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadStars() {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo.owner}/${repo.name}`, {
+          headers: { Accept: "application/vnd.github+json" },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) setStarCount(data?.stargazers_count ?? null);
+      } catch {
+        // Social proof is optional; fail silently.
+      }
+    }
+
+    loadStars();
+    return () => {
+      cancelled = true;
+    };
+  }, [repo.name, repo.owner]);
+
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <header className="navbar" style={{ position: "fixed", left: 0, right: 0 }}>
         <div className="container navbar-inner">
-          {/* Left: Logo/brand */}
+          {/* Left: Brand */}
           <Link to="/" className="brand" style={{ textDecoration: "none" }} aria-label="Elite Explorer home">
             <Sparkles size={18} />
             <span>Elite Explorer</span>
-            <span className="badge">Midnight</span>
+            <span className="badge">Explorer</span>
           </Link>
 
-          {/* Center: Navigation */}
+          {/* Center: Navigation (spec) */}
           <nav className="navlinks navlinks-centered" aria-label="Primary navigation">
-            <Link className="navlink" to="/">
-              Home
-            </Link>
             <Link className="navlink" to="/features">
-              Features
+              Trending Repos
             </Link>
             <Link className="navlink" to="/about">
-              About
+              Top Users
             </Link>
-            <Link className="navlink" to="/contact">
-              Contact
-            </Link>
-            <Link className="navlink" to="/auth">
-              Login
+            <Link className="navlink" to="/help">
+              Documentation
             </Link>
           </nav>
 
-          {/* Right: CTA */}
+          {/* Right: utilities */}
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <button
+              type="button"
+              className="btn"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
+            <a
+              className="btn"
+              href={`https://github.com/${repo.owner}/${repo.name}`}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Star this project on GitHub"
+              title="Star on GitHub"
+            >
+              <Github size={16} />
+              Star
+              <span className="badge" style={{ marginLeft: 2 }}>
+                {starCount == null ? "—" : formatCompactInt(starCount)}
+              </span>
+              <ExternalLink size={14} aria-hidden="true" />
+            </a>
+
             {isAuthed() ? (
               <Button asChild href="/app" className="hover-scale">
                 Go to App
