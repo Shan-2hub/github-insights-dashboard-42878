@@ -117,10 +117,19 @@ async function requestJson(url, { method, headers, body, op }) {
   }
 }
 
+function joinApiUrl(pathname) {
+  // When base is "", we want "/api/..." (not "//api/...").
+  // When base is absolute (e.g., "https://api.example.com"), we want "https://api.example.com/api/...".
+  const base = getBaseUrl();
+  if (!base) return pathname.startsWith("/") ? pathname : `/${pathname}`;
+  const p = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  return `${base}${p}`;
+}
+
 // PUBLIC_INTERFACE
 export async function searchUser(username) {
   /** Search for a GitHub user via backend (caching is handled server-side). */
-  const res = await fetch(`${getBaseUrl()}/api/search/${encodeURIComponent(username)}`, {
+  const res = await fetch(joinApiUrl(`/api/search/${encodeURIComponent(username)}`), {
     method: "GET",
     headers: { Accept: "application/json" },
   });
@@ -144,7 +153,7 @@ export async function searchUser(username) {
 /* PUBLIC_INTERFACE */
 export async function register(email, password) {
   /** Register and receive JWT token. */
-  const url = `${getBaseUrl()}/api/auth/register`;
+  const url = joinApiUrl("/api/auth/register");
   return requestJson(url, {
     op: "Register",
     method: "POST",
@@ -156,7 +165,7 @@ export async function register(email, password) {
 /* PUBLIC_INTERFACE */
 export async function login(email, password) {
   /** Login and receive JWT token. */
-  const url = `${getBaseUrl()}/api/auth/login`;
+  const url = joinApiUrl("/api/auth/login");
   return requestJson(url, {
     op: "Login",
     method: "POST",
@@ -168,7 +177,7 @@ export async function login(email, password) {
 // PUBLIC_INTERFACE
 export async function getAdminHistory() {
   /** Fetch recent searches for the admin table (protected). */
-  const res = await fetch(`${getBaseUrl()}/api/admin/history`, {
+  const res = await fetch(joinApiUrl("/api/admin/history"), {
     method: "GET",
     headers: { Accept: "application/json", ...authHeaders() },
   });
@@ -180,7 +189,7 @@ export async function getAdminHistory() {
 // PUBLIC_INTERFACE
 export async function getAdminStats() {
   /** Fetch admin stats (protected). */
-  const res = await fetch(`${getBaseUrl()}/api/admin/stats`, {
+  const res = await fetch(joinApiUrl("/api/admin/stats"), {
     method: "GET",
     headers: { Accept: "application/json", ...authHeaders() },
   });
