@@ -16,6 +16,7 @@ import HelpPage from "./pages/HelpPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import AuthPage from "./pages/AuthPage";
+import AuthCallbackPage from "./pages/AuthCallbackPage";
 import DashboardHomePage from "./pages/DashboardHomePage";
 import DashboardUserPage from "./pages/DashboardUserPage";
 import DashboardRedirectPage from "./pages/DashboardRedirectPage";
@@ -55,6 +56,7 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
           </Route>
 
           {/* User/app portal */}

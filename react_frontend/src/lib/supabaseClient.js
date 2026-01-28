@@ -46,9 +46,13 @@ export async function signInWithOAuthProvider(provider) {
    */
   const supabase = getSupabaseClient();
 
-  const redirectTo =
+  const baseUrl =
     process.env.REACT_APP_FRONTEND_URL ||
     (typeof window !== "undefined" ? window.location.origin : undefined);
+
+  // IMPORTANT: This must be allowlisted in Supabase Auth settings (Additional Redirect URLs).
+  // Using a dedicated callback path avoids subtle mismatches and makes debugging easier.
+  const redirectTo = baseUrl ? `${baseUrl.replace(/\/$/, "")}/auth/callback` : undefined;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
