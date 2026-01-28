@@ -13,7 +13,10 @@ const DEFAULT_BASE_URL = "";
 /** @returns {string} API base URL */
 function getBaseUrl() {
   // CRA env var convention: REACT_APP_*
-  return process.env.REACT_APP_API_BASE_URL || DEFAULT_BASE_URL;
+  // Backwards/forwards compatible:
+  // - REACT_APP_API_BASE is the container's configured env var
+  // - REACT_APP_API_BASE_URL may exist in older templates
+  return process.env.REACT_APP_API_BASE || process.env.REACT_APP_API_BASE_URL || DEFAULT_BASE_URL;
 }
 
 function authHeaders() {
