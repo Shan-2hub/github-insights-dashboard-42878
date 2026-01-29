@@ -105,14 +105,55 @@ export async function searchUser(username) {
 // PUBLIC_INTERFACE
 export async function register(email, password) {
   /** Register and receive JWT token. */
+  const normalizedEmail = typeof email === "string" ? email.trim() : email;
+
   const res = await safeFetch(`${getBaseUrl()}/api/auth/register`, {
     method: "POST",
     headers: { Accept: "application/json", "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    // Compatibility:
+    // Some FastAPI auth implementations use "username" even when the UI calls it "email".
+    // Sending both avoids accidental backend KeyError/None-handling bugs that can manifest as 500s.
+    body: JSON.stringify({ email: normalizedEmail, username: normalizedEmail, password }),
   });
 
-  const payload = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(payload?.detail || `Register failed (${res.status})`);
+  // Try to parse JSON error bodies but don't crash if backend returns HTML/text.
+  const rawText = await res.text().catch(() => "");
+  let payload = {};
+  try {
+    payload = rawText ? JSON.parse(rawText) : {};
+  } catch {
+    payload = { detail: rawText };
+  }
+
+  if (!res.ok) {
+    // FastAPI commonly returns:
+    // - {detail: "message"} OR
+    // - {detail: [{loc:..., msg:..., type:...}, ...]} for validation errors
+    const detail =
+      typeof payload?.detail === "string"
+        ? payload.detail
+        : Array.isArray(payload?.detail)
+          ? payload.detail.map((e) => e?.msg).filter(Boolean).join("; ")
+          : null;
+
+    const message = detail || `Register failed (${res.status})`;
+    const err = new Error(message);
+    err.status = res.status;
+    err.payload = payload;
+
+    // Helpful dev diagnostics without breaking UX.
+    if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.debug("[api] register failed", {
+        status: res.status,
+        url: `${getBaseUrl()}/api/auth/register`,
+        payload,
+      });
+    }
+
+    throw err;
+  }
+
   return payload;
 }
 
