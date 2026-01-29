@@ -18,6 +18,18 @@ In the project directory, you can run:
 Runs the app in development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
+#### Preview environment note (fix for "Invalid Host header")
+
+When running in a remote preview environment, the dev server is accessed through a non-localhost hostname.
+Create React App / webpack-dev-server can reject such requests with an **"Invalid Host header"** error.
+
+This project includes a **development-only** `.env.development` that sets:
+
+- `HOST=0.0.0.0` (bind to all interfaces)
+- `DANGEROUSLY_DISABLE_HOST_CHECK=true` (disable strict host header checking in dev)
+
+These settings apply only to `npm start` and do not affect production builds (`npm run build`).
+
 ### `npm test`
 
 Launches the test runner in interactive watch mode.
