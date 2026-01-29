@@ -13,7 +13,21 @@ const DEFAULT_BASE_URL = "";
 /** @returns {string} API base URL */
 function getBaseUrl() {
   // CRA env var convention: REACT_APP_*
-  return process.env.REACT_APP_API_BASE_URL || DEFAULT_BASE_URL;
+  //
+  // IMPORTANT:
+  // The project exposes env vars named REACT_APP_API_BASE and/or REACT_APP_BACKEND_URL.
+  // Previously this file looked for REACT_APP_API_BASE_URL, which is not configured,
+  // causing getBaseUrl() to fall back to "" and send requests to the frontend origin
+  // (React dev server) -> 404 for /api/auth/register.
+  const raw =
+    process.env.REACT_APP_API_BASE ||
+    process.env.REACT_APP_BACKEND_URL ||
+    // Backwards compatibility (in case some deployments used this older name):
+    process.env.REACT_APP_API_BASE_URL ||
+    DEFAULT_BASE_URL;
+
+  // Normalize trailing slash so callers can safely append "/api/...".
+  return typeof raw === "string" ? raw.replace(/\/$/, "") : DEFAULT_BASE_URL;
 }
 
 function authHeaders() {
