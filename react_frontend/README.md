@@ -27,9 +27,11 @@ This project includes a **development-only** `.env.development` that sets:
 
 - `HOST=0.0.0.0` (bind to all interfaces)
 - `DANGEROUSLY_DISABLE_HOST_CHECK=true` (disable strict host header checking in dev)
-- `WDS_SOCKET_HOST`, `WDS_SOCKET_PORT`, `WDS_SOCKET_PATH` (ensure the dev-server websocket uses the preview hostname)
+- `PUBLIC_URL` (forces webpack-dev-server to advertise the correct external origin when behind an ingress/proxy)
+- `HTTPS=true` (dev server uses HTTPS so HMR websocket can be secure)
+- `WDS_SOCKET_PROTOCOL`, `WDS_SOCKET_HOST`, `WDS_SOCKET_PORT`, `WDS_SOCKET_PATH` (ensure the HMR websocket uses `wss://` and the preview hostname)
 
-If your preview hostname changes, update `WDS_SOCKET_HOST` accordingly.
+If your preview hostname changes, update `PUBLIC_URL` and `WDS_SOCKET_HOST` accordingly.
 
 These settings apply only to `npm start` and do not affect production builds (`npm run build`).
 
